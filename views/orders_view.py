@@ -83,3 +83,22 @@ def delete_order(pk):
         rows_deleted = db_cursor.rowcount
     
     return True if rows_deleted > 0 else False
+
+
+def update_order(pk, order_data):
+    with sqlite3.connect('./kneeldiamonds.sqlite3') as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+            UPDATE orders
+                SET
+                    metal_id = ?,
+                    size_id = ?,
+                    style_id = ?
+            WHERE id = ?
+        """, (order_data['metal_id'], order_data['size_id'], order_data['style_id'], pk)
+        )
+
+        rows_affected = db_cursor.rowcount
+        
+    return True if rows_affected > 0 else False
