@@ -50,7 +50,8 @@ def get_single_order(url):
 
         #serialized Python list to JSON encoded string
         serialized_order = json.dumps(order_dictionary)
-        return serialized_order
+        
+    return serialized_order
 
 
 def create_order(order_data):
@@ -100,5 +101,5 @@ def update_order(pk, order_data):
         )
 
         rows_affected = db_cursor.rowcount
-        
+
     return True if rows_affected > 0 else False

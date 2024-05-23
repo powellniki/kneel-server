@@ -4,7 +4,7 @@ from nss_handler import HandleRequests, status
 
 #imports
 from views import get_all_orders, get_single_order, create_order, delete_order, update_order
-
+from views import get_all_metals, get_single_metal
 
 
 class JSONServer(HandleRequests):
@@ -25,6 +25,14 @@ class JSONServer(HandleRequests):
                 response_body = get_single_order(url)
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
             
+        elif url['requested_resource'] == 'metals':
+            if url['pk'] == 0:
+                response_body = get_all_metals()
+                return self.response(response_body, status.HTTP_200_SUCCESS.value)
+            else:
+                response_body = get_single_metal(url)
+                return self.response(response_body, status.HTTP_200_SUCCESS.value)
+
         else:
             return self.response("", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
