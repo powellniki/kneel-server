@@ -4,7 +4,7 @@ from nss_handler import HandleRequests, status
 
 #imports
 from views import get_all_orders, get_single_order, create_order, delete_order, update_order
-from views import get_all_metals, get_single_metal
+from views import get_all_metals, get_single_metal, update_metal
 
 
 class JSONServer(HandleRequests):
@@ -19,7 +19,7 @@ class JSONServer(HandleRequests):
 
         if url['requested_resource'] == 'orders':
             if url['pk'] == 0:
-                response_body = get_all_orders()
+                response_body = get_all_orders(url)
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
             else:
                 response_body = get_single_order(url)
@@ -32,6 +32,7 @@ class JSONServer(HandleRequests):
             else:
                 response_body = get_single_metal(url)
                 return self.response(response_body, status.HTTP_200_SUCCESS.value)
+
 
         else:
             return self.response("", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
@@ -66,14 +67,23 @@ class JSONServer(HandleRequests):
         request_body = self.rfile.read(content_len)
         request_body = json.loads(request_body)
 
-        if url['requested_resource'] == 'orders':
-            if pk != 0:
+        if pk != 0:
+            if url['requested_resource'] == 'orders':
                 successfully_updated = update_order(pk, request_body)
                 if successfully_updated:
                     return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
-                
                 else:
                     return self.response("Could not update order", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+                
+            elif url['requested_resource'] == 'metals':
+                successfully_updated = update_metal(pk, request_body)
+                if successfully_updated:
+                    return self.response("", status.HTTP_204_SUCCESS_NO_RESPONSE_BODY.value)
+                else:
+                    return self.response("Could not update order", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
+        
+        else:
+            return self.response("No metal selected", status.HTTP_404_CLIENT_ERROR_RESOURCE_NOT_FOUND.value)
 
 
     def do_DELETE(self):

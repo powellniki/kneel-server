@@ -2,12 +2,47 @@ import sqlite3
 import json
 
 
-def get_all_orders():
+def get_all_orders(url):
     #open a connection to the database
     with sqlite3.connect("./kneeldiamonds.sqlite3") as conn:
         conn.row_factory = sqlite3.Row
         db_cursor = conn.cursor()
 
+    if url['query_params']:
+        db_cursor.execute("""
+            SELECT
+                o.id,
+                o.metal_id,
+                o.size_id,
+                o.style_id,
+                m.id metalId,
+                m.metal metalName,
+                m.price metalPrice
+            FROM orders o
+            JOIN metals m ON m.id = o.metal_id
+        """)
+        query_results = db_cursor.fetchall()
+
+        orders=[]
+        for row in query_results:
+            metal = {
+                "id": row['metalId'],
+                "metal": row['metalName'],
+                "price": row['metalPrice']
+            }
+            order = {
+                "id": row['id'],
+                "metal_id": row['metal_id'],
+                "metal": metal,
+                "size_id": row['size_id'],
+                "style_id": row['style_id']
+            }
+            orders.append(order)
+        serialized_orders = json.dumps(orders)
+        return serialized_orders
+
+
+    else:
         db_cursor.execute("""
         SELECT
             o.id,
@@ -50,7 +85,7 @@ def get_single_order(url):
 
         #serialized Python list to JSON encoded string
         serialized_order = json.dumps(order_dictionary)
-        
+
     return serialized_order
 
 
@@ -97,8 +132,7 @@ def update_order(pk, order_data):
                     size_id = ?,
                     style_id = ?
             WHERE id = ?
-        """, (order_data['metal_id'], order_data['size_id'], order_data['style_id'], pk)
-        )
+        """, (order_data['metal_id'], order_data['size_id'], order_data['style_id'], pk))
 
         rows_affected = db_cursor.rowcount
 
