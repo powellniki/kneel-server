@@ -11,31 +11,51 @@ def get_all_orders(url):
     if url['query_params']:
         db_cursor.execute("""
             SELECT
-                o.id,
-                o.metal_id,
-                o.size_id,
-                o.style_id,
-                m.id metalId,
-                m.metal metalName,
-                m.price metalPrice
+                o.id AS order_id,
+                o.metal_id AS metal_order_id,
+                o.size_id AS size_order_id,
+                o.style_id AS style_order_id,
+                m.id AS metal_id,
+                m.metal AS metal_name,
+                m.price AS metal_price,
+                s.id AS size_id,
+                s.carets AS size_caret,
+                s.price AS size_price,
+                t.id AS style_id,
+                t.style AS style_style,
+                t.price AS style_price
             FROM orders o
             JOIN metals m ON m.id = o.metal_id
+            JOIN sizes s ON s.id = o.size_id
+            JOIN styles t ON t.id = o.style_id
         """)
         query_results = db_cursor.fetchall()
 
         orders=[]
         for row in query_results:
             metal = {
-                "id": row['metalId'],
-                "metal": row['metalName'],
-                "price": row['metalPrice']
+                "id": row['metal_id'],
+                "metal": row['metal_name'],
+                "price": row['metal_price']
+            }
+            size = {
+                "id": row['size_id'],
+                "carets": row['size_caret'],
+                "price": row['size_price']
+            }
+            style = {
+                "id": row['style_id'],
+                "style": row['style_style'],
+                "price": row['style_price']
             }
             order = {
-                "id": row['id'],
-                "metal_id": row['metal_id'],
+                "id": row['order_id'],
+                "metal_id": row['metal_order_id'],
                 "metal": metal,
-                "size_id": row['size_id'],
-                "style_id": row['style_id']
+                "size_id": row['size_order_id'],
+                "size": size,
+                "style_id": row['style_order_id'],
+                "style": style
             }
             orders.append(order)
         serialized_orders = json.dumps(orders)
